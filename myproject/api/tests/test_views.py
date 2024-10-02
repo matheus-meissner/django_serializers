@@ -40,3 +40,22 @@ class PostViewSetTest(APITestCase):
         url = reverse('post-detail', args=[self.post.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+class PostPaginationTest(APITestCase):
+    def setUp(self):
+        for i in range(15):  # Criar 15 posts para testar a paginação
+            Post.objects.create(title=f'Post {i}', content=f'Conteúdo do post {i}')
+
+    def test_post_pagination(self):
+        url = reverse('post-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 10)  # Verifica se apenas 10 itens são retornados na primeira página
+        self.assertIn('next', response.data)  # Verifica se existe um link para a próxima página
+        self.assertIn('previous', response.data)  # Verifica se existe um link para a página anterior (neste caso deve ser None)
+
+    def test_post_pagination_page_2(self):
+    url = reverse('post-list') + '?page=2'
+    response = self.client.get(url)
+    self.assertEqual(response.status_code, status.HTTP_200_OK)
+    self.assertEqual(len(response.data['results']), 5)  # Como criamos 15 posts, a segunda página deve ter 5 itens
