@@ -1,6 +1,6 @@
 version: '3.9'
 
-services: #commit
+services:
   db:
     image: postgres:13
     environment:
@@ -9,6 +9,8 @@ services: #commit
       POSTGRES_DB: mydatabase
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - backend
 
   web:
     build: .
@@ -19,6 +21,12 @@ services: #commit
       - "8000:8000"
     depends_on:
       - db
+    networks:
+      - backend
 
 volumes:
   postgres_data:
+
+networks:
+  backend:
+    driver: bridge
