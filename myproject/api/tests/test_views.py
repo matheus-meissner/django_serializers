@@ -2,10 +2,19 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 from django.urls import reverse
 from api.models import Post
+from django.contrib.auth.models import User
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class PostViewSetTest(APITestCase):
 
     def setUp(self):
+        # Criando um usuário para autenticação
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        
+        # Gerando um token JWT para o usuário
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {str(refresh.access_token)}')
+        
         # Criando um post com caracteres sem acentos
         self.post = Post.objects.create(title='Post de teste', content='Este e um post de teste.')
 
@@ -44,6 +53,13 @@ class PostViewSetTest(APITestCase):
 
 class PostPaginationTest(APITestCase):
     def setUp(self):
+        # Criando um usuário para autenticação
+        self.user = User.objects.create_user(username='testuser', password='testpass')
+        
+        # Gerando um token JWT para o usuário
+        refresh = RefreshToken.for_user(self.user)
+        self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {str(refresh.access_token)}')
+        
         # Criar 15 posts para testar a paginacao
         for i in range(15):
             Post.objects.create(title=f'Post {i}', content=f'Conteudo do post {i}')
